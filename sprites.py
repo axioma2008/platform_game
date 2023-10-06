@@ -113,12 +113,23 @@ class Player(pygame.sprite.Sprite):
 
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, platform_type):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("images/grass.png")
+        if platform_type == 1:
+            self.image = pygame.image.load("images/grass.png")
+        elif platform_type == 2:
+            self.image = pygame.image.load("images/dirt.png")
         self.image = pygame.transform.scale(self.image, (PLATFORM_SIZE, PLATFORM_SIZE))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
 
+class Lava(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("images/lava.png")
+        self.image = pygame.transform.scale(self.image, (PLATFORM_SIZE, PLATFORM_SIZE // 2))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y

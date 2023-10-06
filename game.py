@@ -14,9 +14,11 @@ class Game:
         self.running = True
         self.background = pygame.image.load("images/ba.png")
         self.platform_group = pygame.sprite.Group()
+        self.lava_group = pygame.sprite.Group()
         self.create_map()
         self.player: Player = Player(self.platform_group)
         self.player_group = pygame.sprite.GroupSingle()
+
 
     def new(self):
         # start a new game
@@ -49,7 +51,7 @@ class Game:
         self.platform_group.draw(self.screen)
 #        self.draw_grid()
         self.player_group.draw(self.screen)
-        # *after* drawing everything, flip the display
+        self.lava_group.draw(self.screen)
         pygame.display.flip()
 
     def show_start_screen(self):
@@ -69,9 +71,12 @@ class Game:
     def create_map(self):
         for row_number, row in enumerate(map_list):
             for col_number, col in enumerate(row):
-                if col == 1:
-                    new_platform = Platform(col_number * PLATFORM_SIZE, row_number * PLATFORM_SIZE)
+                if col == 1 or col == 2:
+                    new_platform = Platform(col_number * PLATFORM_SIZE, row_number * PLATFORM_SIZE, col)
                     self.platform_group.add(new_platform)
+                elif col == -1:
+                    new_lava = Lava(col_number * PLATFORM_SIZE, row_number * PLATFORM_SIZE + PLATFORM_SIZE // 2)
+                    self.lava_group.add(new_lava)
 
     def vertical_collision(self):
         collision = pygame.sprite.spritecollide(self.player, self.platform_group, False)
