@@ -4,21 +4,23 @@ from sprites import *
 
 
 class Game:
-    def __init__(self, player):
+    def __init__(self):
         # initialize game window, etc
         pygame.init()
         pygame.mixer.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
-        self.player = player
-        self.all_sprites = pygame.sprite.Group()
         self.running = True
-        self.background = pygame.image.load("images/background.png")
+        self.background = pygame.image.load("images/ba.png")
+        self.platform_group = pygame.sprite.Group()
+        self.create_map()
+        self.player: Player = Player(self.platform_group)
+        self.player_group = pygame.sprite.GroupSingle()
 
     def new(self):
         # start a new game
-        self.all_sprites.add(self.player)
+        self.player_group.add(self.player)
         self.run()
 
     def run(self):
@@ -31,9 +33,10 @@ class Game:
 
     def update(self):
         # Game Loop - Update
-        self.all_sprites.update()
+        self.player_group.update()
 
     def events(self):
+#        self.vertical_collision()
         # Game Loop - events
         for event in pygame.event.get():
             # check for closing window
@@ -43,8 +46,9 @@ class Game:
     def draw(self):
         self.screen.blit(self.background, (0, 0))
         # Game Loop - draw
-
-        self.all_sprites.draw(self.screen)
+        self.platform_group.draw(self.screen)
+#        self.draw_grid()
+        self.player_group.draw(self.screen)
         # *after* drawing everything, flip the display
         pygame.display.flip()
 
@@ -56,9 +60,33 @@ class Game:
         # game over/continue
         pass
 
+    def draw_grid(self):
+        for line in range(0, WIDTH // PLATFORM_SIZE):
+            pygame.draw.line(self.screen, BLACK, (line * PLATFORM_SIZE, 0), (line * PLATFORM_SIZE, HEIGHT))
+        for line in range(0, HEIGHT // PLATFORM_SIZE):
+            pygame.draw.line(self.screen, BLACK, (0, line * PLATFORM_SIZE), (WIDTH, line * PLATFORM_SIZE))
 
-player = Player()
-g = Game(player)
+    def create_map(self):
+        for row_number, row in enumerate(map_list):
+            for col_number, col in enumerate(row):
+                if col == 1:
+                    new_platform = Platform(col_number * PLATFORM_SIZE, row_number * PLATFORM_SIZE)
+                    self.platform_group.add(new_platform)
+
+    def vertical_collision(self):
+        collision = pygame.sprite.spritecollide(self.player, self.platform_group, False)
+        for sprite in collision:
+            if self.player.gravity < 0:
+                self.player.gravity = 0
+                self.player.rect.top = sprite.rect.bottom
+            elif self.player.gravity > 0:
+                self.player.rect.bottom = sprite.rect.top
+                self.player.on_ground = True
+                self.player.gravity = 0
+#            if self.player.direction_x > 0 and
+
+
+g = Game()
 g.show_start_screen()
 while g.running:
     g.new()
