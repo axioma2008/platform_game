@@ -7,7 +7,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, platform_group):
         pygame.sprite.Sprite.__init__(self)
         self.platform_group = platform_group
-        self.gravity = 0
+        self.velocity_y = 0
         self.on_ground = True
         self.direction_x = 0
         self.direction_y = 0
@@ -15,6 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.left_images = []
         self.index = 0
         self.counter = 0
+        self.gravity = 1
 
         for i in range(3, 7):
             image = pygame.image.load(f"images/cat_animation{i}.png")
@@ -28,10 +29,12 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.standing_images[0]
         self.rect = self.image.get_rect()
-        self.rect.y = HEIGHT - PLATFORM_SIZE 
+        self.rect.y = HEIGHT - PLATFORM_SIZE
 
-        self.jump_image = [pygame.transform.scale(pygame.image.load("images/cat_animation8.png"), (PLATFORM_SIZE, PLATFORM_SIZE))]
+        self.jump_image = [
+            pygame.transform.scale(pygame.image.load("images/cat_animation8.png"), (PLATFORM_SIZE, PLATFORM_SIZE))]
         self.jump_image.append(pygame.transform.flip(self.jump_image[0], True, False))
+
     def update(self):
         do_animation = False
         dx = 0
@@ -47,13 +50,12 @@ class Player(pygame.sprite.Sprite):
             do_animation = True
 
         if keys[pygame.K_SPACE] and self.on_ground:
-            self.gravity = -17
+            self.velocity_y = -17
             self.on_ground = False
             if self.direction_x == 1:
                 self.image = self.jump_image[0]
             elif self.direction_x == -1:
                 self.image = self.jump_image[1]
-
 
         if not keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT] and self.on_ground:
             if self.direction_x == 1:
@@ -61,14 +63,10 @@ class Player(pygame.sprite.Sprite):
             elif self.direction_x == -1:
                 self.image = self.standing_images[1]
 
-
-
-
-
-        self.gravity += 1
-        if self.gravity > 10:
-            self.gravity = 10
-        dy += self.gravity
+        self.velocity_y += self.gravity
+        if self.velocity_y > 10:
+            self.velocity_y = 10
+        dy += self.velocity_y
 
         dx, dy = self.check_collision(dx, dy)
 
@@ -84,18 +82,19 @@ class Player(pygame.sprite.Sprite):
         else:
             self.index = 0
             self.counter = 0
+
     def check_collision(self, dx, dy):
         for platform in self.platform_group:
             if platform.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
                 dx = 0
             if platform.rect.colliderect(self.rect.x, self.rect.y + dy, self.rect.width, self.rect.height):
-                if self.gravity < 0:
-                    self.gravity = 0
+                if self.velocity_y < 0:
+                    self.velocity_y = 0
                     dy = platform.rect.bottom - self.rect.top
-                elif self.gravity >= 0:
+                elif self.velocity_y >= 0:
                     dy = platform.rect.top - self.rect.bottom
                     self.on_ground = True
-                    self.gravity = 0
+                    self.velocity_y = 0
         return dx, dy
 
     def animate(self):
@@ -110,7 +109,8 @@ class Player(pygame.sprite.Sprite):
             self.index += 1
             self.counter = 0
 
-
+    def game_over(self):
+        self.image = pygame.image.load("images/cat_ghost.png")
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, platform_type):
@@ -133,3 +133,24 @@ class Lava(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("images/coin.png")
+        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("images/finish.png")
+        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
