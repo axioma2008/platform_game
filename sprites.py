@@ -16,6 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.index = 0
         self.counter = 0
         self.gravity = 1
+        self.is_killed = False
 
         for i in range(3, 7):
             image = pygame.image.load(f"images/cat_animation{i}.png")
@@ -36,6 +37,13 @@ class Player(pygame.sprite.Sprite):
         self.jump_image.append(pygame.transform.flip(self.jump_image[0], True, False))
 
     def update(self):
+
+        if self.is_killed:
+            if self.counter < 90:
+                self.rect.y -= 1
+                self.counter += 1
+            return
+
         do_animation = False
         dx = 0
         dy = 0
@@ -111,6 +119,8 @@ class Player(pygame.sprite.Sprite):
 
     def game_over(self):
         self.image = pygame.image.load("images/cat_ghost.png")
+        self.is_killed = True
+        self.counter = 0
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, platform_type):
@@ -146,11 +156,21 @@ class Coin(pygame.sprite.Sprite):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, is_moving=True):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("images/finish.png")
-        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.image = pygame.image.load(f"images/Enemy_{random.randint(1, 8)}.png")
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.is_moving = is_moving
+        self.move_direction = 1
+        self.move_counter = 0
+
+    def update(self):
+        if self.is_moving:
+            self.rect.x += self.move_direction
+            self.move_counter += 1
+            if self.move_counter > PLATFORM_SIZE:
+                self.move_direction *= -1
+                self.move_counter = 0
 

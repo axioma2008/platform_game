@@ -23,7 +23,7 @@ class Game:
         self.coin_sound = pygame.mixer.Sound("sounds/coin.wav")
         pygame.mixer.music.load("sounds/background_sound.mp3")
         self.score = 0
-        self.font = pygame.font.Font(None, 14)
+        self.font = pygame.font.Font(None, 20)
 
 
     def new(self):
@@ -43,6 +43,7 @@ class Game:
     def update(self):
         # Game Loop - Update
         self.player_group.update()
+        self.enemy_group.update()
 
     def events(self):
         self.collision()
@@ -94,8 +95,8 @@ class Game:
                 elif col == 3:
                     new_coin = Coin(col_number * PLATFORM_SIZE + PLATFORM_SIZE // 4, row_number * PLATFORM_SIZE + PLATFORM_SIZE // 4)
                     self.coin_group.add(new_coin)
-                elif col == 4:
-                    new_enemy = Enemy(col_number * PLATFORM_SIZE + PLATFORM_SIZE // 4, row_number * PLATFORM_SIZE + PLATFORM_SIZE // 4)
+                elif col == 4 or col == 5:
+                    new_enemy = Enemy(col_number * PLATFORM_SIZE, row_number * PLATFORM_SIZE, col == 4)
                     self.enemy_group.add(new_enemy)
 
     def collision(self):
@@ -109,12 +110,13 @@ class Game:
         #         self.player.on_ground = True
         #         self.player.velocity_y = 0
 #            if self.player.direction_x > 0 and
-#         if pygame.sprite.spritecollideany(self.player, self.lava_group):
-#             self.player.kill()
+        if pygame.sprite.spritecollideany(self.player, self.lava_group):
+            self.player.kill()
+        if pygame.sprite.spritecollideany(self.player, self.enemy_group):
+            self.player.game_over()
         if pygame.sprite.spritecollide(self.player, self.coin_group, dokill=True):
             self.coin_sound.play()
             self.score += 1
-
 
 
 g = Game()
