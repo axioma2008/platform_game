@@ -1,4 +1,6 @@
 import pygame
+
+from events import GAME_OVER_EVENT
 from settings import *
 import random
 
@@ -18,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 1
         self.is_killed = False
 
+
         for i in range(3, 7):
             image = pygame.image.load(f"images/cat_animation{i}.png")
             image = pygame.transform.scale(image, (PLATFORM_SIZE, PLATFORM_SIZE))
@@ -30,7 +33,7 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.standing_images[0]
         self.rect = self.image.get_rect()
-        self.rect.y = HEIGHT - PLATFORM_SIZE
+        self.rect.y = HEIGHT - PLATFORM_SIZE * 2
 
         self.jump_image = [
             pygame.transform.scale(pygame.image.load("images/cat_animation8.png"), (PLATFORM_SIZE, PLATFORM_SIZE))]
@@ -39,9 +42,10 @@ class Player(pygame.sprite.Sprite):
     def update(self):
 
         if self.is_killed:
-            if self.counter < 90:
-                self.rect.y -= 1
-                self.counter += 1
+            if self.rect.y > -self.rect.height:
+                self.rect.y -= 3.5
+            else:
+                pygame.event.post(pygame.event.Event(GAME_OVER_EVENT))
             return
 
         do_animation = False
@@ -118,9 +122,13 @@ class Player(pygame.sprite.Sprite):
             self.counter = 0
 
     def game_over(self):
+
         self.image = pygame.image.load("images/cat_ghost.png")
+        center_pos = self.rect.center
+        self.rect = self.image.get_rect()
+        self.rect.center = center_pos
         self.is_killed = True
-        self.counter = 0
+
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, platform_type):
@@ -174,3 +182,12 @@ class Enemy(pygame.sprite.Sprite):
                 self.move_direction *= -1
                 self.move_counter = 0
 
+
+class FinishPoint(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("images/fin.png")
+        self.image = pygame.transform.scale(self.image, (15, 50))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
