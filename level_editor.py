@@ -7,7 +7,7 @@ class Editor:
         # initialize game window, etc
         pygame.init()
         pygame.mixer.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pygame.display.set_mode((WIDTH + PLATFORM_SIZE, HEIGHT))
         pygame.display.set_caption("level editor")
         self.clock = pygame.time.Clock()
         self.running = True
@@ -15,7 +15,12 @@ class Editor:
         pygame.mixer.music.load("sounds/background_sound.mp3")
         self.font = pygame.font.Font(None, 20)
         self.level_map = None
-        self.sprite_images = {}
+        self.sprite_images = {"grass": pygame.image.load("images/grass.png"),
+                              "dirt": pygame.image.load("images/dirt.png"),
+                              "lava": pygame.image.load("images/lava.png"),
+                              "coin": pygame.image.load("images/coin.png"),
+                              "blob": pygame.image.load("images/blob.png"),
+                              "finish_point": pygame.image.load("images/fin.png")}
 
     def new(self):
         # start a new game
@@ -66,6 +71,35 @@ class Editor:
         self.level_map = []
         for i in range(12):
             self.level_map.append([0 for _ in range(20)])
+
+
+class Button(pygame.sprite.Sprite):
+    def __init__(self, image, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.is_selected = False
+
+
+class Menu:
+    def __init__(self, screen):
+        self.screen = screen
+        self.buttons_group = pygame.sprite.Group()
+        self.sprite_images = {"grass": pygame.image.load("images/grass.png"),
+                              "dirt": pygame.image.load("images/dirt.png"),
+                              "lava": pygame.image.load("images/lava.png"),
+                              "coin": pygame.image.load("images/coin.png"),
+                              "blob": pygame.image.load("images/blob.png"),
+                              "finish_point": pygame.image.load("images/fin.png")}
+    def create_buttons(self):
+        counter = 0
+        for key, value in self.sprite_images.items():
+            self.buttons_group.add(Button(pygame.transform.scale(value, (40, 40)),
+                                          [WIDTH + 5, 20 + counter * 40 + 5]))
+            counter += 1
+
 
 
 editor = Editor()
