@@ -1,4 +1,9 @@
-a = [1, 1, 2, 3, 4, 5]
-for number in range(len(a)):
-    a[number] += 5
-print(a)
+# import pickle
+# test_list = [1, 2, 3]
+# with open("save", "wb") as file:
+#     pickle.dump(test_list, file)
+# with open("save", "rb") as file:
+#     data = pickle.load(file)
+#     print(data[2], type(data))
+import os
+print(os.listdir())
